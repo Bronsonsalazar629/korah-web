@@ -1,3 +1,4 @@
-# Current Issues
+# To-do
 
-* Need to implement streaming -> Right now, when the prompt is too long and takes longer than 10s to process, Vercel times out and fails to return the data.
+* When response is too long it stops outputting for some reason
+* Need to implement markdown and latex formatting while streaming.
