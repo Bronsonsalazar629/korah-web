@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Korah AI — Chat</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="korah-chat.css"/>
+</head>
+
+<body class="bg-base tx">
+
+<canvas id="bg-canvas" class="fixed inset-0 z-0 pointer-events-none opacity-40"></canvas>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside id="sidebar" class="sidebar bg-sf glass t-theme">
+  <div class="sidebar-header">
+    <a href="#" class="flex items-center gap-2.5 no-underline">
+      <div class="w-10 h-10 rounded-xl grad-bg flex items-center justify-center font-display text-xl font-black text-white shadow-glow logo-btn">
+        <span class="logo-letter">
+          <img src = "logo.png">
+        </span>
+      </div>
+      <div class="flex flex-col leading-tight">
+        <span class="font-display text-[19px] font-bold tx">Korah</span>
+        <span class="text-[9px] font-semibold tracking-[2.5px] uppercase tx-p4">Beta · Study AI</span>
+      </div>
+    </a>
+    <button id="new-chat-btn" class="new-chat-btn grad-bg text-white text-xs font-bold px-4 py-2 rounded-full border-none cursor-pointer shadow-glow t-btn">
+      + New Chat
+    </button>
+  </div>
+
+  <div class="sidebar-section-label">Recent Chats</div>
+  <div id="chat-history" class="chat-history">
+    <button class="history-item active t-btn" data-session="current">
+      <span class="history-icon">📚</span>
+      <span class="history-text">Photosynthesis Study Guide</span>
+    </button>
+    <button class="history-item t-btn" data-session="1">
+      <span class="history-icon">🧮</span>
+      <span class="history-text">Calculus Flashcards</span>
+    </button>
+    <button class="history-item t-btn" data-session="2">
+      <span class="history-icon">⚗️</span>
+      <span class="history-text">Chemistry Practice Test</span>
+    </button>
+    <button class="history-item t-btn" data-session="3">
+      <span class="history-icon">📝</span>
+      <span class="history-text">Essay Outline — WWII</span>
+    </button>
+    <button class="history-item t-btn" data-session="4">
+      <span class="history-icon">🔢</span>
+      <span class="history-text">Statistics Review</span>
+    </button>
+  </div>
+
+  <div class="sidebar-section-label mt-4">Quick Tools</div>
+  <div class="quick-tools">
+    <button class="quick-tool-btn t-btn" data-action="flashcards">
+      <span>🃏</span> Flashcards
+    </button>
+    <button class="quick-tool-btn t-btn" data-action="studyguide">
+      <span>📖</span> Study Guide
+    </button>
+    <button class="quick-tool-btn t-btn" data-action="practice">
+      <span>🎯</span> Practice Test
+    </button>
+    <button class="quick-tool-btn t-btn" data-action="timer">
+      <span>⏱️</span> Focus Timer
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="mood-indicator" id="sidebar-mood">
+      <span class="mood-dot" id="mood-dot">🟢</span>
+      <span class="text-xs tx2 font-medium">Full Focus Mode</span>
+    </div>
+    <button id="theme-toggle-btn" class="theme-toggle-small t-btn" title="Toggle theme">
+      <span id="theme-icon">☀️</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ═══ MAIN CHAT AREA ═══ -->
+<main id="main-content" class="main-content">
+
+  <!-- Top bar -->
+  <header class="chat-topbar bg-sf glass-sm t-theme bd">
+    <button id="sidebar-toggle" class="sidebar-toggle-btn t-btn tx2" aria-label="Toggle sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="chat-title-area">
+      <div class="korah-status-dot"></div>
+      <span class="font-semibold tx text-sm" id="chat-title">Photosynthesis Study Guide</span>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="topbar-btn t-btn tx2" id="clear-chat-btn" title="Clear chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6M14,11v6"/><path d="M9,6V4a1,1,0,0,1,1-1h4a1,1,0,0,1,1,1v2"/>
+        </svg>
+      </button>
+      <button class="topbar-btn t-btn tx2" title="Export chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21,15v4a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Chat messages -->
+  <div id="chat-body" class="chat-body">
+    <div id="messages-container">
+
+      <!-- Welcome state -->
+      <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-mascot">
+          <div class="mascot-ring"></div>
+          <div class="mascot-avatar grad-bg shadow-glow-lg">
+            <span class="mascot-letter" img src = "logo.png">
+              <img src = "logo.png">
+            </span>
+          </div>
+        </div>
+        <h2 class="font-display text-3xl font-black tx mb-2">Hey, I'm Korah ✨</h2>
+        <p class="tx2 text-sm leading-relaxed text-center max-w-sm">Your AI study companion. Tell me what you're working on, how you're feeling, or ask me to generate study materials.</p>
+
+        <div class="suggestion-grid">
+          <button class="suggestion-chip t-btn" data-prompt="Generate flashcards for photosynthesis">
+            🃏 Make flashcards for photosynthesis
+          </button>
+          <button class="suggestion-chip t-btn" data-prompt="I have a test tomorrow and I'm stressed. What should I study first?">
+            😰 I have a test tomorrow, help me prioritize
+          </button>
+          <button class="suggestion-chip t-btn" data-prompt="Create a study guide for Chapter 5 on cellular respiration">
+            📖 Study guide for cellular respiration
+          </button>
+          <button class="suggestion-chip t-btn" data-prompt="Give me a 10-question practice test on World War II">
+            🎯 Practice test on World War II
+          </button>
+        </div>
+
+        <div class="mood-picker-mini">
+          <span class="text-xs tx3 mb-2 block text-center">How are you feeling today?</span>
+          <div class="mood-row">
+            <button class="mood-mini gm active" data-mood="gm" data-dot="🟢" data-label="Full Focus Mode">🟢 Full Focus</button>
+            <button class="mood-mini ym" data-mood="ym" data-dot="🟡" data-label="Moderate Mode">🟡 Moderate</button>
+            <button class="mood-mini rm" data-mood="rm" data-dot="🔴" data-label="Low Energy Mode">🔴 Low Energy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages will appear here -->
+      <div id="messages-list"></div>
+    </div>
+  </div>
+
+  <!-- Typing indicator (hidden by default) -->
+  <div id="typing-indicator" class="typing-bar hidden">
+    <div class="typing-bubble bg-card border bd t-theme">
+      <div class="flex items-center gap-1.5 text-[11px] font-bold tracking-[1px] tx-p4 uppercase mb-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-p4 animate-pulse"></span>Korah AI
+      </div>
+      <div class="typing-dots">
+        <span class="typing-dot"></span>
+        <span class="typing-dot" style="animation-delay:.2s"></span>
+        <span class="typing-dot" style="animation-delay:.4s"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input area -->
+  <div class="chat-input-area bg-sf glass t-theme bd">
+    <div class="input-wrapper">
+      <div class="input-tools">
+        <button class="input-tool-btn t-btn tx3" title="Attach file">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.44,11.05l-9.19,9.19a6,6,0,0,1-8.49-8.49l9.19-9.19a4,4,0,0,1,5.66,5.66l-9.2,9.19a2,2,0,0,1-2.83-2.83l8.49-8.48"/>
+          </svg>
+        </button>
+        <button class="input-tool-btn t-btn tx3" id="tool-flashcard" title="Generate flashcards" data-prompt="Generate flashcards for: ">
+          🃏
+        </button>
+        <button class="input-tool-btn t-btn tx3" id="tool-guide" title="Create study guide" data-prompt="Create a study guide for: ">
+          📖
+        </button>
+      </div>
+      <textarea
+        id="chat-input"
+        class="chat-textarea tx bg-transparent"
+        placeholder="Ask Korah anything… or tell me how you're feeling 🧠"
+        rows="1"
+      ></textarea>
+      <button id="send-btn" class="send-btn grad-bg t-btn" aria-label="Send message">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/>
+        </svg>
+      </button>
+    </div>
+    <div class="input-footer">
+      <span class="text-[10px] tx3">Korah can make mistakes. Verify important information.</span>
+      <span class="char-count text-[10px] tx3" id="char-count">0 / 2000</span>
+    </div>
+  </div>
+
+</main>
+
+<script src="korah-chat.js"></script>
+</body>
+</html>
